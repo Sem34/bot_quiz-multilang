@@ -10,6 +10,6 @@ module.exports = {
       B) Salt (salty nuts, cheese sticks) or chocolate\n\n
       C) Fried foods, potato chips, or sour foods\n\n
       D) Ice cream, cream cheese, sour cream, or milk`,
-    // Другие вопросы
+    // ... other questions
   };
   
