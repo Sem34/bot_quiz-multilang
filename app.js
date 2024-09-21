@@ -2,27 +2,35 @@ const TelegramBot = require('node-telegram-bot-api');
 const values = require('./values.js');
 const bot = new TelegramBot(values.bot_token, { polling: true });
 
-// Import files with questions
-const questionsUk = require('./questions_uk.js');
-const questionsEn = require('./questions_en.js');
+// Import question files
+const questionsUk = require('./questions/questions_uk.js');
+const questionsEn = require('./questions/questions_en.js');
+const questionsPl = require('./questions/questions_pl.js');
+const questionsRu = require('./questions/questions_ru.js');
 
-// Import results for different languages
-const resultsUk = require('./results_uk.js');
-const resultsEn = require('./results_en.js');
+// Import result files for different languages
+const resultsUk = require('./results/results_uk.js');
+const resultsEn = require('./results/results_en.js');
+const resultsPl = require('./results/results_pl.js');
+const resultsRu = require('./results/results_ru.js');
 
+// Start keyboard with language selection
 const startKeyboard = {
   reply_markup: {
-    keyboard: [
+    inline_keyboard: [
       [
-        { text: '🇺🇦 Українська' },
-        { text: '🇬🇧 English' }
+        { text: '🇺🇦 Українська', callback_data: 'lang_uk' },
+        { text: '🇬🇧 English', callback_data: 'lang_en' }
+      ],
+      [
+        { text: '🇵🇱 Polski', callback_data: 'lang_pl' },
+        { text: '🇷🇺 Русский', callback_data: 'lang_ru' }
       ]
-    ],
-    resize_keyboard: true,
-    one_time_keyboard: true
+    ]
   }
 };
 
+// Create dynamic keyboard for answers
 const keyboard = (questionsNumber) => {
   return [
     { text: '✨ A ✨', callback_data: `${questionsNumber}1` },
@@ -32,14 +40,20 @@ const keyboard = (questionsNumber) => {
   ];
 };
 
+// Function to display the result
 const result = (A, B, C, D, chatId, language) => {
   if (!chatId) {
     console.error('chat_id is empty in result function');
     return;
   }
 
-  const results = language === 'uk' ? resultsUk : resultsEn;
+  // Select results based on the language
+  const results = language === 'uk' ? resultsUk
+               : language === 'en' ? resultsEn
+               : language === 'pl' ? resultsPl
+               : resultsRu;
 
+  // Send result message
   bot.sendMessage(chatId, results.resultMessage(A, B, C, D), { parse_mode: 'Markdown' });
 
   const number = Math.max(A, B, C, D);
@@ -59,75 +73,99 @@ const result = (A, B, C, D, chatId, language) => {
   }
 };
 
+// Main bot logic
 const botLogic = async () => {
-  bot.setMyCommands([{ command: '/start', description: 'Пройти тест ще раз' }]);
+  bot.setMyCommands([{ command: '/start', description: 'Restart the test' }]);
 
   let A = 0, B = 0, C = 0, D = 0;
-  let currentLanguage = ''; // Variable for tracking language
-
+  let currentLanguage = ''; // To track the current language
+  
+  // Handle messages
   bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
     if (msg.text === '/start') {
-      bot.sendMessage(chatId, 'Оберіть мову:', startKeyboard);
-    } else if (msg.text === '🇺🇦 Українська') {
-      A = B = C = D = 0; // reset the counters
-      currentLanguage = 'uk'; // Set the language
-      bot.sendMessage(chatId, questionsUk.start, {
-        reply_markup: { inline_keyboard: [[{ text: '✨ Почати тест ✨', callback_data: 'test_start_uk' }]] },
-        parse_mode: 'Markdown'
-      });
-    } else if (msg.text === '🇬🇧 English') {
-      A = B = C = D = 0; // reset the counters
-      currentLanguage = 'en'; // Set the language
-      bot.sendMessage(chatId, questionsEn.start, {
-        reply_markup: { inline_keyboard: [[{ text: '✨ Start Test ✨', callback_data: 'test_start_en' }]] },
-        parse_mode: 'Markdown'
-      });
+      bot.sendMessage(chatId, 'Choose a language:', startKeyboard);
     }
   });
-
+  
+  // Handle callback queries (button clicks)
   bot.on('callback_query', async (query) => {
     const action = query.data;
     const chatId = query.message.chat.id;
 
-    // Logic to start the test
-    if (action === 'test_start_uk') {
-      bot.sendMessage(chatId, questionsUk.first, {
-        reply_markup: { inline_keyboard: [keyboard(1)] },
+    // Handle language selection
+    if (action === 'lang_uk') {
+      A = B = C = D = 0; // Reset counters
+      currentLanguage = 'uk'; // Set language
+      bot.sendMessage(chatId, questionsUk.start, {
+        reply_markup: { inline_keyboard: [[{ text: '✨ Почати тест ✨', callback_data: 'test_start_uk' }]] },
         parse_mode: 'Markdown'
       });
-    } else if (action === 'test_start_en') {
-      bot.sendMessage(chatId, questionsEn.first, {
+    } else if (action === 'lang_en') {
+      A = B = C = D = 0;
+      currentLanguage = 'en';
+      bot.sendMessage(chatId, questionsEn.start, {
+        reply_markup: { inline_keyboard: [[{ text: '✨ Start Test ✨', callback_data: 'test_start_en' }]] },
+        parse_mode: 'Markdown'
+      });
+    } else if (action === 'lang_pl') {
+      A = B = C = D = 0;
+      currentLanguage = 'pl';
+      bot.sendMessage(chatId, questionsPl.start, {
+        reply_markup: { inline_keyboard: [[{ text: '✨ Rozpocznij test ✨', callback_data: 'test_start_pl' }]] },
+        parse_mode: 'Markdown'
+      });
+    } else if (action === 'lang_ru') {
+      A = B = C = D = 0;
+      currentLanguage = 'ru';
+      bot.sendMessage(chatId, questionsRu.start, {
+        reply_markup: { inline_keyboard: [[{ text: '✨ Начать тест ✨', callback_data: 'test_start_ru' }]] },
+        parse_mode: 'Markdown'
+      });
+    }
+
+    // Handle test start
+    if (action.startsWith('test_start')) {
+      const question = currentLanguage === 'uk' ? questionsUk.first
+                      : currentLanguage === 'en' ? questionsEn.first
+                      : currentLanguage === 'pl' ? questionsPl.first
+                      : questionsRu.first;
+
+      bot.sendMessage(chatId, question, {
         reply_markup: { inline_keyboard: [keyboard(1)] },
         parse_mode: 'Markdown'
       });
     }
 
-    // Processing questions
+    // Handle answers
     const questionNumber = parseInt(action.charAt(0));
     const option = parseInt(action.charAt(1));
 
     if (questionNumber === 1) {
-      // Increase the counter depending on the selected option
+      // Update counters based on the selected answer
       if (option === 1) A++;
       else if (option === 2) B++;
       else if (option === 3) C++;
       else if (option === 4) D++;
 
-      // Moving on to the second question
-      const nextQuestion = currentLanguage === 'uk' ? questionsUk.second : questionsEn.second;
+      // Send the second question
+      const nextQuestion = currentLanguage === 'uk' ? questionsUk.second
+                          : currentLanguage === 'en' ? questionsEn.second
+                          : currentLanguage === 'pl' ? questionsPl.second
+                          : questionsRu.second;
+      
       bot.sendMessage(chatId, nextQuestion, {
         reply_markup: { inline_keyboard: [keyboard(2)] },
         parse_mode: 'Markdown'
       });
     } else if (questionNumber === 2) {
-      //Increase the counter for the second question
+      // Update counters for the second question
       if (option === 1) A++;
       else if (option === 2) B++;
       else if (option === 3) C++;
       else if (option === 4) D++;
 
-      // Call the result
+      // Show the result
       result(A, B, C, D, chatId, currentLanguage);
     }
   });
