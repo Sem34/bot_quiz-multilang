@@ -1,15 +1,15 @@
 // results_pl.js
 module.exports = {
-    resultMessage: (A, B, C, D) => `*Twój wynik:*
-    "Tarczycowy"=${A}/13,
-    "Nadnerczowy"=${B}/13,
-    "Wątrobowy"=${C}/13,
-    "Jajnikowy"=${D}/13`,
+  resultMessage: (A, B, C, D) => `*Twój wynik:*
+  Typ tarczycy = ${A}/13,
+  Typ nadnerczy = ${B}/13,
+  Typ wątrobowy = ${C}/13,
+  Typ jajnikowy = ${D}/13`,
 
-    links: {
-      A: `<a href="https://professional.skin/test_a">Tarczycowy</a>`,
-      B: `<a href="https://professional.skin/test_b">Nadnerczowy</a>`,
-      C: `<a href="https://professional.skin/test_c">Wątrobowy</a>`,
-      D: `<a href="https://professional.skin/test_d">Jajnikowy</a>`,
-    }
+  links: {
+    A: `<a href="https://professional.skin/test_a">Typ tarczycy</a>`,
+    B: `<a href="https://professional.skin/test_b">Typ nadnerczy</a>`,
+    C: `<a href="https://professional.skin/test_c">Typ wątrobowy</a>`,
+    D: `<a href="https://professional.skin/test_d">Typ jajnikowy</a>`,
+  }
 };

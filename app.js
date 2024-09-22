@@ -32,44 +32,39 @@ const startKeyboard = {
 
 // Create dynamic keyboard for answers
 const keyboard = (questionsNumber) => {
-  return [
-    { text: '✨ A ✨', callback_data: `${questionsNumber}1` },
-    { text: '✨ B ✨', callback_data: `${questionsNumber}2` },
-    { text: '✨ C ✨', callback_data: `${questionsNumber}3` },
-    { text: '✨ D ✨', callback_data: `${questionsNumber}4` }
-  ];
+  return {
+    inline_keyboard: [
+      [
+        { text: '✨ A ✨', callback_data: `${questionsNumber}1` },
+        { text: '✨ B ✨', callback_data: `${questionsNumber}2` },
+        { text: '✨ C ✨', callback_data: `${questionsNumber}3` },
+        { text: '✨ D ✨', callback_data: `${questionsNumber}4` }
+      ]
+    ]
+  };
 };
 
 // Function to display the result
 const result = (A, B, C, D, chatId, language) => {
-  if (!chatId) {
-    console.error('chat_id is empty in result function');
-    return;
-  }
-
-  // Select results based on the language
   const results = language === 'uk' ? resultsUk
                : language === 'en' ? resultsEn
                : language === 'pl' ? resultsPl
                : resultsRu;
 
-  // Send result message
+  // Отправляем сообщение с результатами
   bot.sendMessage(chatId, results.resultMessage(A, B, C, D), { parse_mode: 'Markdown' });
 
-  const number = Math.max(A, B, C, D);
-  switch (number) {
-    case A:
-      bot.sendMessage(chatId, results.links.A, { parse_mode: 'HTML' });
-      break;
-    case B:
-      bot.sendMessage(chatId, results.links.B, { parse_mode: 'HTML' });
-      break;
-    case C:
-      bot.sendMessage(chatId, results.links.C, { parse_mode: 'HTML' });
-      break;
-    case D:
-      bot.sendMessage(chatId, results.links.D, { parse_mode: 'HTML' });
-      break;
+  const maxScore = Math.max(A, B, C, D); // Находим максимальный балл
+
+  // Проверяем, какой тип наибольший и отправляем соответствующую ссылку
+  if (maxScore === A) {
+    bot.sendMessage(chatId, results.links.A, { parse_mode: 'HTML' });
+  } else if (maxScore === B) {
+    bot.sendMessage(chatId, results.links.B, { parse_mode: 'HTML' });
+  } else if (maxScore === C) {
+    bot.sendMessage(chatId, results.links.C, { parse_mode: 'HTML' });
+  } else if (maxScore === D) {
+    bot.sendMessage(chatId, results.links.D, { parse_mode: 'HTML' });
   }
 };
 
@@ -78,95 +73,113 @@ const botLogic = async () => {
   bot.setMyCommands([{ command: '/start', description: 'Restart the test' }]);
 
   let A = 0, B = 0, C = 0, D = 0;
-  let currentLanguage = ''; // To track the current language
-  
-  // Handle messages
+  let currentLanguage = '';
+  let currentQuestion = 0; // Start from 0
+
   bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
     if (msg.text === '/start') {
-      bot.sendMessage(chatId, 'Choose a language:', startKeyboard);
+      const startMessage = `🇺🇦 Привіт! Виберіть мову:
+🇬🇧 Hello! Choose a language:
+🇵🇱 Cześć! Wybierz język:
+🇷🇺 Привет! Выберите язык:`;
+      bot.sendMessage(chatId, startMessage, startKeyboard);
     }
   });
   
-  // Handle callback queries (button clicks)
   bot.on('callback_query', async (query) => {
     const action = query.data;
+    console.log(`Action received: ${action}`); // Debugging output
     const chatId = query.message.chat.id;
 
     // Handle language selection
-    if (action === 'lang_uk') {
+    if (action.startsWith('lang_')) {
       A = B = C = D = 0; // Reset counters
-      currentLanguage = 'uk'; // Set language
-      bot.sendMessage(chatId, questionsUk.start, {
-        reply_markup: { inline_keyboard: [[{ text: '✨ Почати тест ✨', callback_data: 'test_start_uk' }]] },
+      currentLanguage = action.split('_')[1]; // Set language
+      currentQuestion = 0; // Reset current question
+
+      const startMessage = currentLanguage === 'uk' ? questionsUk.start :
+                           currentLanguage === 'en' ? questionsEn.start :
+                           currentLanguage === 'pl' ? questionsPl.start :
+                           questionsRu.start;
+
+      const startButtonText = {
+        uk: '✨ Розпочати тест ✨',
+        en: '✨ Start Test ✨',
+        pl: '✨ Rozpocznij test ✨',
+        ru: '✨ Начать тест ✨'
+      };
+                        
+      bot.sendMessage(chatId, startMessage, {
+        reply_markup: { inline_keyboard: [[{ text: startButtonText[currentLanguage], callback_data: `test_start_${currentLanguage}` }]] },
         parse_mode: 'Markdown'
       });
-    } else if (action === 'lang_en') {
-      A = B = C = D = 0;
-      currentLanguage = 'en';
-      bot.sendMessage(chatId, questionsEn.start, {
-        reply_markup: { inline_keyboard: [[{ text: '✨ Start Test ✨', callback_data: 'test_start_en' }]] },
-        parse_mode: 'Markdown'
-      });
-    } else if (action === 'lang_pl') {
-      A = B = C = D = 0;
-      currentLanguage = 'pl';
-      bot.sendMessage(chatId, questionsPl.start, {
-        reply_markup: { inline_keyboard: [[{ text: '✨ Rozpocznij test ✨', callback_data: 'test_start_pl' }]] },
-        parse_mode: 'Markdown'
-      });
-    } else if (action === 'lang_ru') {
-      A = B = C = D = 0;
-      currentLanguage = 'ru';
-      bot.sendMessage(chatId, questionsRu.start, {
-        reply_markup: { inline_keyboard: [[{ text: '✨ Начать тест ✨', callback_data: 'test_start_ru' }]] },
-        parse_mode: 'Markdown'
-      });
+      return; // Exit to prevent further processing
     }
 
     // Handle test start
     if (action.startsWith('test_start')) {
-      const question = currentLanguage === 'uk' ? questionsUk.first
-                      : currentLanguage === 'en' ? questionsEn.first
-                      : currentLanguage === 'pl' ? questionsPl.first
-                      : questionsRu.first;
+      currentQuestion = 1; // Start from the first question
+      const question = currentLanguage === 'uk' ? questionsUk.first :
+                       currentLanguage === 'en' ? questionsEn.first :
+                       currentLanguage === 'pl' ? questionsPl.first :
+                       questionsRu.first;
 
       bot.sendMessage(chatId, question, {
-        reply_markup: { inline_keyboard: [keyboard(1)] },
+        reply_markup: keyboard(currentQuestion),
         parse_mode: 'Markdown'
       });
+      return; // Exit to prevent further processing
     }
 
     // Handle answers
-    const questionNumber = parseInt(action.charAt(0));
-    const option = parseInt(action.charAt(1));
+const questionNumber = Math.floor(parseInt(action) / 10); // Получаем номер вопроса
+const option = parseInt(action.charAt(action.length - 1)); // Получаем выбранный вариант
 
-    if (questionNumber === 1) {
-      // Update counters based on the selected answer
-      if (option === 1) A++;
-      else if (option === 2) B++;
-      else if (option === 3) C++;
-      else if (option === 4) D++;
+if (!isNaN(option)) {
+  console.log(`Option selected: ${option}`); // Debugging output
 
-      // Send the second question
-      const nextQuestion = currentLanguage === 'uk' ? questionsUk.second
-                          : currentLanguage === 'en' ? questionsEn.second
-                          : currentLanguage === 'pl' ? questionsPl.second
-                          : questionsRu.second;
-      
-      bot.sendMessage(chatId, nextQuestion, {
-        reply_markup: { inline_keyboard: [keyboard(2)] },
-        parse_mode: 'Markdown'
-      });
-    } else if (questionNumber === 2) {
-      // Update counters for the second question
-      if (option === 1) A++;
-      else if (option === 2) B++;
-      else if (option === 3) C++;
-      else if (option === 4) D++;
+  // Update counters based on selected answer
+  if (option === 1) {
+    A++;
+    console.log(`A count: ${A}`); // Debugging output
+  } else if (option === 2) {
+    B++;
+    console.log(`B count: ${B}`); // Debugging output
+  } else if (option === 3) {
+    C++;
+    console.log(`C count: ${C}`); // Debugging output
+  } else if (option === 4) {
+    D++;
+    console.log(`D count: ${D}`); // Debugging output
+  }
 
-      // Show the result
-      result(A, B, C, D, chatId, currentLanguage);
+
+      // Check if we should show the next question
+      if (currentQuestion < 13) {
+        const questions = currentLanguage === 'uk' ? questionsUk :
+                          currentLanguage === 'en' ? questionsEn :
+                          currentLanguage === 'pl' ? questionsPl :
+                          questionsRu;
+
+        currentQuestion++; // Increment before getting the next question
+        const nextQuestionKey = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth'][currentQuestion - 1];
+
+        const nextQuestion = questions[nextQuestionKey];
+
+        if (nextQuestion) {
+          bot.sendMessage(chatId, nextQuestion, {
+            reply_markup: keyboard(currentQuestion),
+            parse_mode: 'Markdown'
+          });
+        }
+      } else {
+        // Show results if all questions are answered
+        result(A, B, C, D, chatId, currentLanguage);
+        currentQuestion = 0; // Reset for the next survey
+      }
+    } else {
+      console.error(`Unexpected option: ${option}`);
     }
   });
 };
