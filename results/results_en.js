@@ -7,9 +7,9 @@ module.exports = {
   "Ovarian"=${D}/13`,
 
   links: {
-    A: `<a href="https://professional.skin/test_a">Thyroid</a>`,
-    B: `<a href="https://professional.skin/test_b">Adrenaline</a>`,
-    C: `<a href="https://professional.skin/test_c">Liver-related</a>`,
-    D: `<a href="https://professional.skin/test_d">Ovarian</a>`,
+    A: `<a href="https://professional.skin/entest_a">Thyroid</a>`,
+    B: `<a href="https://professional.skin/entest_b">Adrenaline</a>`,
+    C: `<a href="https://professional.skin/entest_c">Liver-related</a>`,
+    D: `<a href="https://professional.skin/entest_d">Ovarian</a>`,
   }
 };
