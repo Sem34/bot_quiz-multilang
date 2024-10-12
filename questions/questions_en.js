@@ -50,7 +50,7 @@ module.exports = {
     eighth: `*(8/13) You have:*\n\n 
       A) Stiff and dry hair\n\n
       B) Swollen ankles, sock marks remain\n\n
-      C) Flaky skin or loupe on your eyebrows and head\n\n
+      C) Flaky skin or dandruff on your eyebrows and head\n\n
       D) Intense night sweats, hot flashes`,
     
     ninth: `*(9/13) You have:*\n\n 

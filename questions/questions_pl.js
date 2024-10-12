@@ -48,7 +48,7 @@ seventh: `*(7/13) Czy:*\n\n
 eighth: `*(8/13) Masz:*\n\n
   A) Sztywne i suche włosy\n\n
   B) Opuchnięte kostki, pozostają ślady po skarpetkach\n\n
-  C) Łuszczącą się skórę lub „szkło powiększające” na brwiach i głowie\n\n
+  C) Łuszczącą się skórę lub łupież na brwiach i głowie\n\n
   D) Intensywne nocne poty, uderzenia gorąca`,
 
 ninth: `*(9/13) Masz:*\n\n
