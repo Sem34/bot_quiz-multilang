@@ -149,8 +149,8 @@ const botLogic = async () => {
     }
 
     // Handle answers
-    const questionNumber = Math.floor(parseInt(action) / 10); // Получаем номер вопроса
-    const option = parseInt(action.charAt(action.length - 1)); // Получаем выбранный вариант
+    const questionNumber = Math.floor(parseInt(action) / 10); 
+    const option = parseInt(action.charAt(action.length - 1)); 
 
     if (!isNaN(option)) {
       console.log(`Option selected: ${option}`); // Debugging output
