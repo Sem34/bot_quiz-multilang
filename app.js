@@ -38,21 +38,37 @@ const keyboard = (questionsNumber) => {
         { text: '✨ A ✨', callback_data: `${questionsNumber}1` },
         { text: '✨ B ✨', callback_data: `${questionsNumber}2` },
         { text: '✨ C ✨', callback_data: `${questionsNumber}3` },
-        { text: '✨ D ✨', callback_data: `${questionsNumber}4` }
+        { text: '✨ D ✨', callback_data: `${questionsNumber}4` },
+        { text: '✨ E ✨', callback_data: `${questionsNumber}5` }
       ]
     ]
   };
 };
 
 // Function to display the result
-const result = (A, B, C, D, chatId, language) => {
+const result = (A, B, C, D, Ecount, chatId, language) => {
   const results = language === 'uk' ? resultsUk
                : language === 'en' ? resultsEn
                : language === 'pl' ? resultsPl
                : resultsRu;
 
   // Отправляем сообщение с результатами
-  bot.sendMessage(chatId, results.resultMessage(A, B, C, D), { parse_mode: 'Markdown' });
+  bot.sendMessage(chatId, results.resultMessage(A, B, C, D, Ecount), { parse_mode: 'Markdown' });
+
+  // if 'E' answers are majority or tie situation, send balanced message
+  if (results.links && results.links.E) {
+    const scores = [A, B, C, D];
+    const maxScore = Math.max(...scores);
+    const leaders = scores.filter(s => s === maxScore).length;
+
+    const majorityE = Ecount >= 7;        // 7+ з 13 відповідей — явно баланс
+    const tieAD = maxScore === 0 || leaders > 1; // нічия або взагалі нуль
+
+    if (majorityE || tieAD) {
+      bot.sendMessage(chatId, results.links.E, { parse_mode: 'Markdown' });
+      return;
+    }
+  }
 
   const maxScore = Math.max(A, B, C, D); // Находим максимальный балл
 
@@ -72,7 +88,7 @@ const result = (A, B, C, D, chatId, language) => {
 const botLogic = async () => {
   bot.setMyCommands([{ command: '/start', description: 'Restart the test' }]);
 
-  let A = 0, B = 0, C = 0, D = 0;
+  let A = 0, B = 0, C = 0, D = 0, Ecount = 0;
   let currentLanguage = '';
   let currentQuestion = 0; // Start from 0
 
@@ -94,7 +110,7 @@ const botLogic = async () => {
 
     // Handle language selection
     if (action.startsWith('lang_')) {
-      A = B = C = D = 0; // Reset counters
+      A = B = C = D = Ecount = 0; // Reset counters
       currentLanguage = action.split('_')[1]; // Set language
       currentQuestion = 0; // Reset current question
 
@@ -152,8 +168,10 @@ if (!isNaN(option)) {
   } else if (option === 4) {
     D++;
     console.log(`D count: ${D}`); // Debugging output
+  } else if (option === 5) {
+    Ecount++;
+    console.log(`E count: ${Ecount}`); // Debugging output
   }
-
 
       // Check if we should show the next question
       if (currentQuestion < 13) {
@@ -175,7 +193,7 @@ if (!isNaN(option)) {
         }
       } else {
         // Show results if all questions are answered
-        result(A, B, C, D, chatId, currentLanguage);
+        result(A, B, C, D, Ecount, chatId, currentLanguage);
         currentQuestion = 0; // Reset for the next survey
       }
     } else {
@@ -185,4 +203,3 @@ if (!isNaN(option)) {
 };
 
 botLogic();
-
