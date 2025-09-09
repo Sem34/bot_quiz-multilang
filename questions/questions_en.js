@@ -1,87 +1,37 @@
 module.exports = {
-    start: `Select one letter (A, B, C, or D) in each group of questions below.
-      If you have more than one symptom listed in the same group, highlight the most intense one.
-      Women in menopause or postmenopause should answer the questions (D) regarding the ovarian body type based on whether they have experienced the mentioned issues or conditions in the past.
-      There will be a total of 13 questions to be answered.
+  start: `Select one letter (A, B, C, D or E) in each of the 13 question groups below.
+If you have several symptoms within one question, choose the most pronounced one.
+Women in meno/postmenopause should answer items (D) considering their past experience.
 
-      Are you ready?`,
-      first: `*(1/13) You have:*\n\n 
-      A) Dry skin, especially on your hands and elbows\n\n
-      B) Dark circles under your eyes\n\n
-      C) Small red spots on the body\n\n
-      D) Tendency to have breakouts before menstruation`,
-    
-    second: `*(2/13) Do you have a constant craving for:*\n\n
-      A) Sweets, bread, pasta\n\n
-      B) Salt (salted nuts, cheese sticks) or (and) chocolate\n\n
-      C) Deep-fried foods, potato chips or sour foods\n\n
-      D) Ice cream, cream cheese, sour cream or milk`,
-    
-    third: `*(3/13) Do you have:*\n\n 
-      A) Brittle nails with longitudinal ridges\n\n
-      B) Facial hair (for women)\n\n
-      C) Nails with white spots\n\n
-      D) Thinning and loss of hair on certain days of the menstrual cycle`,
-    
-    fourth: `*(4/13) You have:*\n\n 
-      A) Excess weight distributed more or less evenly\n\n
-      B) Fat accumulation in the back, chest, abdomen, while arms and legs appear disproportionately thin\n\n
-      C) Protruding abdomen\n\n
-      D) Excess fat in the abdominal area (below the waist), legs, and lower buttocks (pear-shaped figure)`,
-    
-    fifth: `*(5/13) Do you experience:*\n\n 
-      A) Cold feet and need to sleep in socks\n\n
-      B) Occasionally leg cramps at night\n\n
-      C) Hot or swollen feet\n\n
-      D) Fluid retention during menstruation`,
-    
-    sixth: `*(6/13) You have:*\n\n 
-      A) Poor appetite, constipation\n\n
-      B) You have chronic inflammation\n\n
-      C) Dark yellow urine\n\n
-      D) Heavy menstruation`,
-    
-    seventh: `*(7/13) Do you experience:*\n\n 
-      A) Excessive fatigue early in the evening (around 7:30 PM) and feel comfortable early in the morning\n\n
-      B) Feeling of shortness of breath when climbing stairs\n\n
-      C) Feeling more energetic in the evening (night owl)\n\n
-      D) Being moody or irritable at certain times of the month`,
-    
-    eighth: `*(8/13) You have:*\n\n 
-      A) Stiff and dry hair\n\n
-      B) Swollen ankles, sock marks remain\n\n
-      C) Flaky skin or dandruff on your eyebrows and head\n\n
-      D) Intense night sweats, hot flashes`,
-    
-    ninth: `*(9/13) You have:*\n\n 
-      A) Sagging skin on the inner surfaces of your arms and under your chin\n\n
-      B) Accumulation of fat around the waist and abdomen in the form of a bulging ring\n\n
-      C) A yellowish tint in the whites of your eyes\n\n
-      D) You have a history of ovarian or breast cysts`,
-    
-    tenth: `*(10/13) Do you have:*\n\n 
-      A) Sleepiness and a need for daytime naps\n\n
-      B) Difficulty falling asleep, shallow and fragmented sleep\n\n
-      C) Insomnia and anxious awakenings during the night\n\n
-      D) Sudden fatigue and a feeling of "fog" in your head`,
-    
-    eleventh: `*(11/13) Do you have:*\n\n 
-      A) Eyebrow hair loss, especially from the outer sides\n\n
-      B) Calcium deposits or calcium-related issues – bursitis, kidney stones, heel spurs, early cataracts\n\n
-      C) Discomfort or pain in the right shoulder and right side of the neck\n\n
-      D) Pain in one knee or lower back that intensifies during menstruation`,
-    
-    twelfth: `*(12/13) You have:*\n\n 
-      A) High cholesterol levels\n\n
-      B) Unstable blood glucose levels\n\n
-      C) Abdominal bloating, constipation, belching after meals\n\n
-      D) Lower libido`,
-    
-    thirteenth: `*(13/13) You have:*\n\n 
-      A) Cold, pale, yellowish skin, decreased sweating, hyperkeratosis of the epidermis\n\n
-      B) Couperosis, loss of skin firmness\n\n
-      C) Psoriasis, eczema, itchy skin at night\n\n
-      D) Endometriosis, myoma, mastitis`
-    // ... other questions if needed
-  };
-  
+*Note:*  
+Hypothyroidism = "hypo" (reduced thyroid function)  
+Hyperthyroidism = "hyper" (increased thyroid function)
+
+*Shall we start?*`,
+
+  first: `*(1/13) Skin condition*\n\nA) Dry, cold, flaky — *hypo*; or moist, hot, prone to rashes — *hyper*.\n\nB) Face turns pale or flushes under stress, dark circles under the eyes, puffy face, cold extremities.\n\nC) Yellowish tint, rashes after heavy meals.\n\nD) Spider veins on legs, varicose veins, rashes before menstruation.\n\nE) Smooth skin, no particular features.`,
+
+  second: `*(2/13) Sleep*\n\nA) Hard to wake up, drowsiness (*hypo*) or fragmented sleep, nighttime palpitations (*hyper*).\n\nB) Difficult to relax, often wake up from tension, need for daytime naps.\n\nC) Awakenings due to heaviness in the stomach, bitterness.\n\nD) Sleep worsens 3–5 days before menstruation.\n\nE) Sleep is stable.`,
+
+  third: `*(3/13) Energy*\n\nA) Chronic fatigue (*hypo*) or hyperactivity, tremors, heat intolerance (*hyper*).\n\nB) Energy only “for stress,” followed by sharp exhaustion.\n\nC) More strength after coffee or spicy food, but heaviness appears quickly.\n\nD) Energy fluctuations depending on the cycle, especially in the second phase.\n\nE) Stable energy level.`,
+
+  fourth: `*(4/13) Weight*\n\nA) Evenly distributed excess weight (*hypo*) or rapid weight loss with good appetite (*hyper*).\n\nB) Fat on the stomach, back, double chin, “hump” on the neck; arms/legs thin. Flat buttocks, hard to build rounded glutes.\n\nC) “Apple belly,” like a basketball; hard waist; pressure in the right side.\n\nD) Fat accumulation in the lower body — thighs, buttocks, pelvis.\n\nE) Stable weight.`,
+
+  fifth: `*(5/13) Digestion*\n\nA) Constipation, slow digestion (*hypo*) or frequent bowel movements, diarrhea (*hyper*).\n\nB) Tendency to spasms, “nervous” bowels. Any stress — I immediately run to the toilet.\n\nC) Heaviness after fatty foods, nausea, bloating.\n\nD) Bloating and pain in the lower abdomen before menstruation.\n\nE) Digestion without complaints.`,
+
+  sixth: `*(6/13) Mood*\n\nA) Apathy, depression (*hypo*) or anxiety, irritability (*hyper*).\n\nB) Panic attacks, feeling “on edge.”\n\nC) Irritability after fatty food or alcohol.\n\nD) Emotional swings in the second phase of the cycle.\n\nE) Relatively stable mood.`,
+
+  seventh: `*(7/13) Hair and nails*\n\nA) Brittle hair, hair loss, even thinning eyebrows, dull hair (*hypo*) — or hair loss with oily skin, sweating (*hyper*).\n\nB) Hair loss and thinning after severe stress on the scalp; meanwhile mustache/chin hair started to grow.\n\nC) Brittle nails, white spots, hair loss after intoxications.\n\nD) Hair loss and brittleness in the second half of the cycle.\n\nE) Hair and nails without problems.`,
+
+  eighth: `*(8/13) Cardiovascular system*\n\nA) Low blood pressure, weakness (*hypo*) or tachycardia, high blood pressure (*hyper*).\n\nB) Blood pressure spikes during stress, palpitations, tremors, panic attacks.\n\nC) Heaviness in the right upper abdomen, high cholesterol.\n\nD) Varicose veins in the legs, swelling, pelvic varicose veins. Endometriosis.\n\nE) Normal blood pressure and vessels.`,
+
+  ninth: `*(9/13) Thermoregulation*\n\nA) Always cold (*hypo*) or always hot, heat intolerance (*hyper*).\n\nB) Cold hands/feet even in a warm room.\n\nC) Sweating and heaviness after heavy meals.\n\nD) Temperature rises before menstruation, heat in the legs, night sweats, hot flashes.\n\nE) Comfortable thermoregulation.`,
+
+  tenth: `*(10/13) Cycle (for women)*\n\nA) Irregular cycle (*hypo*) or accelerated cycle, short phases (*hyper*).\n\nB) Menstrual delay after stress or irregular cycle.\n\nC) Worsened PMS after fatty or toxic food.\n\nD) Painful menstruation, mastopathy, pelvic varicose veins. Menopause.\n\nE) Stable cycle.`,
+
+  eleventh: `*(11/13) Nervous system*\n\nA) Slowness of thought, forgetfulness (*hypo*) or excessive anxiety, hyperactivity (*hyper*).\n\nB) Feeling “unable to switch off,” body constantly tense.\n\nC) Irritability and headaches after fatty food or alcohol.\n\nD) Emotional breakdowns, sensitivity to hormonal fluctuations.\n\nE) Balanced nervous system.`,
+
+  twelfth: `*(12/13) Digestive tract and liver*\n\nA) Constipation (*hypo*) or diarrhea (*hyper*).\n\nB) Stomach “tightens from nerves,” cramps and bloating. Sometimes constipation, sometimes diarrhea.\n\nC) Bitterness in the mouth, nausea, bloating after meals.\n\nD) Bloating and pain before menstruation. Constipation on the eve of menstruation.\n\nE) Calm digestion.`,
+
+  thirteenth: `*(13/13) General sensations*\n\nA) Sluggishness, fatigue, swelling (*hypo*) — or restlessness, tremors, sweating (*hyper*).\n\nB) Feeling constantly ready to “fight or flee.” Anxiety.\n\nC) Heaviness after eating, allergies, rashes.\n\nD) Heaviness in the legs, varicose veins, PMS, swelling. Menopause.\n\nE) I feel balanced and free of symptoms.`
+};

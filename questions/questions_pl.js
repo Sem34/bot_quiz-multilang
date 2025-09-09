@@ -1,86 +1,37 @@
 module.exports = {
-    start: `Wybierz jedną literę (A, B, C lub D) z każdej grupy poniższych pytań. Jeśli masz kilka objawów wymienionych w jednej grupie, zaznacz najbardziej wyraźny objaw. Kobiety w okresie menopauzy lub postmenopauzalnym powinny odpowiadać na pytania - (D), dotyczące typu ciała jajnikowego, z punktu widzenia tego, czy miały wcześniej wymienione problemy lub stany.
-Należy odpowiedzieć na 13 pytań.
-  *Gotowy, aby zacząć?*`,
-    
- first: `*(1/13) Masz:*\n\n 
-  A) Suchą skórę, szczególnie na dłoniach i łokciach\n\n
-  B) Cienie pod oczami\n\n
-  C) Małe czerwone kropki na ciele\n\n
-  D) Skłonność do wyprysków przed miesiączką`,
+  start: `Wybierz jedną literę (A, B, C, D lub E) w każdej z 13 grup pytań.
+Jeśli masz kilka objawów w obrębie jednego pytania — zaznacz najbardziej wyraźny.
+Kobiety w okresie meno-/postmenopauzy odpowiadają na punkty (D) z uwzględnieniem wcześniejszych doświadczeń.
 
-second: `*(2/13) Czy masz ciągły apetyt na:*\n\n
-  A) Słodycze, chleb, makaron\n\n
-  B) Sól (solone orzechy, paluszki serowe) lub (i) czekoladę\n\n
-  C) Smażone w głębokim tłuszczu potrawy, chipsy lub kwaśne potrawy\n\n
-  D) Lody, serki śmietankowe, śmietanę lub mleko`,
+*Uwaga:*  
+Hipotyreoza = „hipo” (niedoczynność tarczycy)  
+Hipertyreoza = „hiper” (nadczynność tarczycy)
 
-third: `*(3/13) Masz:*\n\n
-  A) Kruche paznokcie z podłużnymi bruzdami\n\n
-  B) Zarost na twarzy (u kobiet)\n\n
-  C) Paznokcie z białymi plamkami\n\n
-  D) Przerzedzenie i wypadanie włosów w niektóre dni cyklu miesiączkowego`,
+*Zaczynamy?*`,
 
-fourth: `*(4/13) Masz:*\n\n
-  A) Nadwaga jest rozłożona mniej więcej równomiernie\n\n
-  B) Tłuszcz odkłada się na plecach, klatce piersiowej i brzuchu, podczas gdy ramiona i nogi wyglądają nieproporcjonalnie chudo\n\n
-  C) Wybrzuszony brzuch\n\n
-  D) Tłuszcz na brzuchu (poniżej talii), nogach i pośladkach (kształt gruszki)`,
+  first: `*(1/13) Stan skóry*\n\nA) Sucha, zimna, łuszcząca się — obecna *hipo* (niedocz.), albo wilgotna, gorąca, skłonna do wysypek — obecna *hiper* (nadcz.).\n\nB) Twarz blednie lub czerwieni się ze stresu, ciemne kręgi pod oczami, obrzęknięta twarz, zimne kończyny.\n\nC) Żółtawy odcień, wysypki po ciężkim jedzeniu.\n\nD) Siatka naczyniowa na nogach, żylaki, wysypki przed miesiączką.\n\nE) Skóra gładka, bez szczególnych cech.`,
 
-fifth: `*(5/13) U Ciebie:*\n\n
-  A) Marzną nogi i musisz spać w skarpetkach\n\n
-  B) Czasami nocą masz skurcze łydek\n\n
-  C) Gorące lub opuchnięte stopy\n\n
-  D) Zatrzymywanie płynów podczas menstruacji`,
+  second: `*(2/13) Sen*\n\nA) Trudno się obudzić, senność (*hipo*) albo przerywany sen, kołatanie serca w nocy (*hiper*).\n\nB) Trudno się zrelaksować, często budzę się z napięcia, potrzebuję drzemki w ciągu dnia.\n\nC) Przebudzenia z powodu ciężkości w brzuchu, goryczy.\n\nD) Pogorszenie snu na 3–5 dni przed miesiączką.\n\nE) Śpię stabilnie.`,
 
-sixth: `*(6/13) U Ciebie:*\n\n
-  A) Zły apetyt, zaparcia\n\n
-  B) Jakieś przewlekłe choroby\n\n
-  C) Ciemnożółty mocz\n\n
-  D) Obfite miesiączki`,
+  third: `*(3/13) Energia*\n\nA) Przewlekłe zmęczenie (*hipo*) albo nadpobudliwość, drżenie, nietolerancja gorąca (*hiper*).\n\nB) Energia tylko „na stres”, potem gwałtowne wyczerpanie.\n\nC) Więcej sił po kawie lub ostrej potrawie, ale szybko pojawia się ciężkość.\n\nD) Wahania energii w zależności od cyklu, szczególnie w drugiej fazie.\n\nE) Stabilny poziom energii.`,
 
-seventh: `*(7/13) Czy:*\n\n
-  A) Odczuwasz nadmierne zmęczenie wczesnym wieczorem (około 19:30), ale czujesz się dobrze w godzinach porannych\n\n
-  B) Odczuwasz zadyszkę podczas wchodzenia po schodach\n\n
-  C) Czujesz się bardziej czujny wieczorem (typ „sowy”)\n\n
-  D) Czujesz się nastrojowy, rozdrażniony w pewnych okresach miesiąca`,
+  fourth: `*(4/13) Waga*\n\nA) Równomierna nadwaga (*hipo*) albo nagłe chudnięcie przy dobrym apetycie (*hiper*).\n\nB) Tłuszcz na brzuchu, plecach, drugi podbródek, „garb” na szyi; ręce/nogi szczupłe. Pośladki płaskie, trudno wyrzeźbić okrągłe.\n\nC) „Brzuch-jabłko”, jak piłka do koszykówki, twarda talia, uczucie ucisku w prawym boku.\n\nD) Odkładanie się tłuszczu w dolnej części ciała — uda, pośladki, miednica.\n\nE) Waga stabilna.`,
 
-eighth: `*(8/13) Masz:*\n\n
-  A) Sztywne i suche włosy\n\n
-  B) Opuchnięte kostki, pozostają ślady po skarpetkach\n\n
-  C) Łuszczącą się skórę lub łupież na brwiach i głowie\n\n
-  D) Intensywne nocne poty, uderzenia gorąca`,
+  fifth: `*(5/13) Trawienie*\n\nA) Zaparcia, powolne trawienie (*hipo*) albo częste wypróżnienia, biegunka (*hiper*).\n\nB) Skłonność do skurczów, „nerwowe” jelita. Każdy stres — od razu biegnę do toalety.\n\nC) Ciężkość po tłustym jedzeniu, nudności, wzdęcia.\n\nD) Wzdęcia i ból w dole brzucha przed miesiączką.\n\nE) Trawienie bez dolegliwości.`,
 
-ninth: `*(9/13) Masz:*\n\n
-  A) Obwisłą skórę po wewnętrznej stronie ramion i podbródka\n\n
-  B) Nagromadzenie tłuszczu w talii i na brzuchu w kształcie nadmuchiwanego koła\n\n
-  C) Białka oczu mają żółtawy odcień\n\n
-  D) W przeszłości występowały u Ciebie torbiele jajników lub piersi`,
+  sixth: `*(6/13) Nastrój*\n\nA) Apatia, depresyjność (*hipo*) albo lęk, drażliwość (*hiper*).\n\nB) Ataki paniki, poczucie „bycia na granicy”.\n\nC) Drażliwość po tłustym jedzeniu lub alkoholu.\n\nD) Wahania emocjonalne w drugiej fazie cyklu.\n\nE) Nastrój stosunkowo równy.`,
 
-tenth: `*(10/13) Masz:*\n\n
-  A) Senność, potrzeba snu w ciągu dnia\n\n
-  B) Trudności z zasypianiem, płytki i przerywany sen\n\n
-  C) Bezsenność i niepokojące przebudzenia w środku nocy\n\n
-  D) Zmęczenie i uczucie „zamglenia” w głowie`,
+  seventh: `*(7/13) Włosy i paznokcie*\n\nA) Kruche włosy, wypadanie, nawet brwi rzadsze, matowe (*hipo*) albo wypadanie przy tłustej skórze, potliwość (*hiper*).\n\nB) Wypadanie i przerzedzenie włosów po silnym stresie; za to wąsy/włosy na brodzie zaczęły rosnąć.\n\nC) Kruche paznokcie, białe plamki, wypadanie włosów po zatruciach.\n\nD) Wypadanie włosów i kruchość w drugiej połowie cyklu.\n\nE) Włosy i paznokcie bez problemów.`,
 
-eleventh: `*(11/13) Masz:*\n\n
-  A) Wypadają Ci brwi, szczególnie po zewnętrznej stronie\n\n
-  B) Złogi wapnia lub problemy z wapniem – zapalenie kaletki, kamienie nerkowe, ostrogi piętowe, wczesna zaćma\n\n
-  C) Odczuwasz dyskomfort lub ból w prawym ramieniu i po prawej stronie szyi\n\n
-  D) Odczuwasz ból w jednym kolanie lub w dolnej części pleców, który nasila się podczas miesiączki`,
+  eighth: `*(8/13) Układ sercowo-naczyniowy*\n\nA) Niskie ciśnienie, osłabienie (*hipo*) albo tachykardia, wysokie ciśnienie (*hiper*).\n\nB) Skoki ciśnienia podczas stresu, kołatanie serca, drżenie, ataki paniki.\n\nC) Ciężkość w prawym podżebrzu, podwyższony cholesterol.\n\nD) Żylaki na nogach, obrzęki, żylaki miednicy małej. Endometrioza.\n\nE) Ciśnienie i naczynia w normie.`,
 
-twelfth: `*(12/13) Masz:*\n\n
-  A) Wysoki poziom cholesterolu\n\n
-  B) Niestabilny poziom glukozy we krwi\n\n
-  C) Wzdęcia brzucha, zaparcia, odbijanie się po posiłkach\n\n
-  D) Obniżone libido`,
+  ninth: `*(9/13) Termoregulacja*\n\nA) Ciągle marzniesz (*hipo*) albo ciągle ci gorąco, nietolerancja ciepła (*hiper*).\n\nB) Zimne ręce/nogi nawet w ciepłym pomieszczeniu.\n\nC) Potliwość i ciężkość po ciężkim jedzeniu.\n\nD) Podwyższona temperatura przed miesiączką, gorąco w nogach, nocna potliwość, uderzenia gorąca.\n\nE) Komfortowa termoregulacja.`,
 
-thirteenth: `*(13/13) Masz:*\n\n
-  A) Zimną, bladą, żółtawą skórę, zmniejszoną potliwość, nadmierne rogowacenie naskórka\n\n
-  B) Kuperoz, utrata elastyczności skóry\n\n
-  C) Łuszczycę, egzemę, swędzenie skóry w nocy\n\n
-  D) Endometriozę, mięśniaki macicy, zapalenie sutka`
+  tenth: `*(10/13) Cykl (dla kobiet)*\n\nA) Nieregularny cykl (*hipo*) albo przyspieszony, krótkie fazy (*hiper*).\n\nB) Opóźnienie miesiączki po stresie albo nieregularny cykl.\n\nC) Nasilenie PMS po tłustym lub toksycznym jedzeniu.\n\nD) Bolesne miesiączki, mastopatia, żylaki miednicy małej. Klimakterium.\n\nE) Cykl stabilny.`,
 
-  //...add other questions (if needed)
-  };
-  
+  eleventh: `*(11/13) Układ nerwowy*\n\nA) Powolne myślenie, zapominanie (*hipo*) albo nadmierny lęk, nadpobudliwość (*hiper*).\n\nB) Poczucie, że „nie mogę się wyłączyć”, ciało stale napięte.\n\nC) Drażliwość i bóle głowy po tłustym jedzeniu lub alkoholu.\n\nD) Załamania emocjonalne, wrażliwość na wahania hormonalne.\n\nE) Układ nerwowy zrównoważony.`,
+
+  twelfth: `*(12/13) Przewód pokarmowy i wątroba*\n\nA) Zaparcia (*hipo*) lub biegunki (*hiper*).\n\nB) Żołądek ściska „ze stresu”, skurcze i wzdęcia. Raz zaparcia, raz biegunka.\n\nC) Gorycz w ustach, nudności, wzdęcia po jedzeniu.\n\nD) Wzdęcia i ból przed miesiączką. Zaparcia w przeddzień miesiączki.\n\nE) Trawienie spokojne.`,
+
+  thirteenth: `*(13/13) Ogólne odczucia*\n\nA) Powolność, zmęczenie, obrzęki (*hipo*) albo niepokój, drżenie, potliwość (*hiper*).\n\nB) Poczucie stałej gotowości „walczyć lub uciekać”. Lęk.\n\nC) Ciężkość po jedzeniu, alergie, wysypki.\n\nD) Ciężkość w nogach, żylaki, PMS, obrzęki. Klimakterium.\n\nE) Czuję równowagę i brak objawów.`
+};
