@@ -38,25 +38,41 @@ const keyboard = (questionsNumber) => {
         { text: '✨ A ✨', callback_data: `${questionsNumber}1` },
         { text: '✨ B ✨', callback_data: `${questionsNumber}2` },
         { text: '✨ C ✨', callback_data: `${questionsNumber}3` },
-        { text: '✨ D ✨', callback_data: `${questionsNumber}4` }
+        { text: '✨ D ✨', callback_data: `${questionsNumber}4` },
+        { text: '✨ E ✨', callback_data: `${questionsNumber}5` }
       ]
     ]
   };
 };
 
 // Function to display the result
-const result = (A, B, C, D, chatId, language) => {
+const result = (A, B, C, D, Ecount, chatId, language) => {
   const results = language === 'uk' ? resultsUk
-               : language === 'en' ? resultsEn
-               : language === 'pl' ? resultsPl
-               : resultsRu;
+    : language === 'en' ? resultsEn
+      : language === 'pl' ? resultsPl
+        : resultsRu;
 
-  // Отправляем сообщение с результатами
-  bot.sendMessage(chatId, results.resultMessage(A, B, C, D), { parse_mode: 'Markdown' });
+  // Sen result summary
+  bot.sendMessage(chatId, results.resultMessage(A, B, C, D, Ecount), { parse_mode: 'Markdown' });
 
-  const maxScore = Math.max(A, B, C, D); // Находим максимальный балл
+  // if 'E' answers are majority or tie situation, send balanced message
+  if (results.links && results.links.E) {
+    const scores = [A, B, C, D];
+    const maxScore = Math.max(...scores);
+    const leaders = scores.filter(s => s === maxScore).length;
 
-  // Проверяем, какой тип наибольший и отправляем соответствующую ссылку
+    const majorityE = Ecount >= 7;
+    const tieAD = maxScore === 0 || leaders > 1;
+
+    if (majorityE || tieAD) {
+      bot.sendMessage(chatId, results.links.E, { parse_mode: 'Markdown' });
+      return;
+    }
+  }
+
+  const maxScore = Math.max(A, B, C, D); // Find the highest score
+
+  // Check which score is the highest and send corresponding link
   if (maxScore === A) {
     bot.sendMessage(chatId, results.links.A, { parse_mode: 'HTML' });
   } else if (maxScore === B) {
@@ -72,7 +88,7 @@ const result = (A, B, C, D, chatId, language) => {
 const botLogic = async () => {
   bot.setMyCommands([{ command: '/start', description: 'Restart the test' }]);
 
-  let A = 0, B = 0, C = 0, D = 0;
+  let A = 0, B = 0, C = 0, D = 0, Ecount = 0;
   let currentLanguage = '';
   let currentQuestion = 0; // Start from 0
 
@@ -86,7 +102,7 @@ const botLogic = async () => {
       bot.sendMessage(chatId, startMessage, startKeyboard);
     }
   });
-  
+
   bot.on('callback_query', async (query) => {
     const action = query.data;
     console.log(`Action received: ${action}`); // Debugging output
@@ -94,14 +110,14 @@ const botLogic = async () => {
 
     // Handle language selection
     if (action.startsWith('lang_')) {
-      A = B = C = D = 0; // Reset counters
+      A = B = C = D = Ecount = 0; // Reset counters
       currentLanguage = action.split('_')[1]; // Set language
       currentQuestion = 0; // Reset current question
 
       const startMessage = currentLanguage === 'uk' ? questionsUk.start :
-                           currentLanguage === 'en' ? questionsEn.start :
-                           currentLanguage === 'pl' ? questionsPl.start :
-                           questionsRu.start;
+        currentLanguage === 'en' ? questionsEn.start :
+          currentLanguage === 'pl' ? questionsPl.start :
+            questionsRu.start;
 
       const startButtonText = {
         uk: '✨ Розпочати тест ✨',
@@ -109,7 +125,7 @@ const botLogic = async () => {
         pl: '✨ Rozpocznij test ✨',
         ru: '✨ Начать тест ✨'
       };
-                        
+
       bot.sendMessage(chatId, startMessage, {
         reply_markup: { inline_keyboard: [[{ text: startButtonText[currentLanguage], callback_data: `test_start_${currentLanguage}` }]] },
         parse_mode: 'Markdown'
@@ -121,9 +137,9 @@ const botLogic = async () => {
     if (action.startsWith('test_start')) {
       currentQuestion = 1; // Start from the first question
       const question = currentLanguage === 'uk' ? questionsUk.first :
-                       currentLanguage === 'en' ? questionsEn.first :
-                       currentLanguage === 'pl' ? questionsPl.first :
-                       questionsRu.first;
+        currentLanguage === 'en' ? questionsEn.first :
+          currentLanguage === 'pl' ? questionsPl.first :
+            questionsRu.first;
 
       bot.sendMessage(chatId, question, {
         reply_markup: keyboard(currentQuestion),
@@ -133,34 +149,36 @@ const botLogic = async () => {
     }
 
     // Handle answers
-const questionNumber = Math.floor(parseInt(action) / 10); // Получаем номер вопроса
-const option = parseInt(action.charAt(action.length - 1)); // Получаем выбранный вариант
+    const questionNumber = Math.floor(parseInt(action) / 10); 
+    const option = parseInt(action.charAt(action.length - 1)); 
 
-if (!isNaN(option)) {
-  console.log(`Option selected: ${option}`); // Debugging output
+    if (!isNaN(option)) {
+      console.log(`Option selected: ${option}`); // Debugging output
 
-  // Update counters based on selected answer
-  if (option === 1) {
-    A++;
-    console.log(`A count: ${A}`); // Debugging output
-  } else if (option === 2) {
-    B++;
-    console.log(`B count: ${B}`); // Debugging output
-  } else if (option === 3) {
-    C++;
-    console.log(`C count: ${C}`); // Debugging output
-  } else if (option === 4) {
-    D++;
-    console.log(`D count: ${D}`); // Debugging output
-  }
-
+      // Update counters based on selected answer
+      if (option === 1) {
+        A++;
+        console.log(`A count: ${A}`); // Debugging output
+      } else if (option === 2) {
+        B++;
+        console.log(`B count: ${B}`); // Debugging output
+      } else if (option === 3) {
+        C++;
+        console.log(`C count: ${C}`); // Debugging output
+      } else if (option === 4) {
+        D++;
+        console.log(`D count: ${D}`); // Debugging output
+      } else if (option === 5) {
+        Ecount++;
+        console.log(`E count: ${Ecount}`); // Debugging output
+      }
 
       // Check if we should show the next question
       if (currentQuestion < 13) {
         const questions = currentLanguage === 'uk' ? questionsUk :
-                          currentLanguage === 'en' ? questionsEn :
-                          currentLanguage === 'pl' ? questionsPl :
-                          questionsRu;
+          currentLanguage === 'en' ? questionsEn :
+            currentLanguage === 'pl' ? questionsPl :
+              questionsRu;
 
         currentQuestion++; // Increment before getting the next question
         const nextQuestionKey = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth'][currentQuestion - 1];
@@ -175,7 +193,7 @@ if (!isNaN(option)) {
         }
       } else {
         // Show results if all questions are answered
-        result(A, B, C, D, chatId, currentLanguage);
+        result(A, B, C, D, Ecount, chatId, currentLanguage);
         currentQuestion = 0; // Reset for the next survey
       }
     } else {
