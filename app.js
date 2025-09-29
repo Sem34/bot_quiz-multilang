@@ -89,15 +89,18 @@ const result = (A, B, C, D, E, chatId, language) => {
 const botLogic = async () => {
   bot.setMyCommands([{ command: '/start', description: 'Restart the test' }]);
 
-  let A = 0, B = 0, C = 0, D = 0, E = 0;
-  let currentLanguage = '';
-  let currentQuestion = 0; // Start from 0
-
   bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
-    if (msg.text === '/start') {
-      chatState[chatId] = { inProgress: false, currentQuestion: 0, sessionId: null, lastMessageId: null };
 
+    if (msg.text === '/start') {
+      chatState[chatId] = {
+        inProgress: false,
+        currentQuestion: 0,
+        sessionId: null,
+        lastMessageId: null,
+        language: '',
+        scores: { A: 0, B: 0, C: 0, D: 0, E: 0 }
+      };
       const startMessage = `🇺🇦 Привіт! Виберіть мову:
 🇬🇧 Hello! Choose a language:
 🇵🇱 Cześć! Wybierz język:
@@ -119,13 +122,18 @@ const botLogic = async () => {
 
     // Handle language selection
     else if (action.startsWith('lang_')) {
-      A = B = C = D = E = 0; // Reset counters
-      currentLanguage = action.split('_')[1]; // Set language
-      currentQuestion = 0; // Reset current question
+      const chosenLanguage = action.split('_')[1];
+      chatState[chatId] = chatState[chatId] || {};
+      chatState[chatId].inProgress = false;
+      chatState[chatId].currentQuestion = 0;
+      chatState[chatId].sessionId = null;
+      chatState[chatId].lastMessageId = null;
+      chatState[chatId].language = chosenLanguage;
+      chatState[chatId].scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
 
-      const startMessage = currentLanguage === 'uk' ? questionsUk.start :
-        currentLanguage === 'en' ? questionsEn.start :
-          currentLanguage === 'pl' ? questionsPl.start :
+      const startMessage = chosenLanguage === 'uk' ? questionsUk.start :
+        chosenLanguage === 'en' ? questionsEn.start :
+          chosenLanguage === 'pl' ? questionsPl.start :
             questionsRu.start;
 
       const startButtonText = {
@@ -135,33 +143,45 @@ const botLogic = async () => {
         ru: '✨ Начать тест ✨'
       };
 
-      bot.sendMessage(chatId, startMessage, {
-        reply_markup: { inline_keyboard: [[{ text: startButtonText[currentLanguage], callback_data: `test_start_${currentLanguage}` }]] },
-        parse_mode: 'Markdown'
-      });
-      await bot.answerCallbackQuery(query.id).catch(() => {});
+      try {
+        await bot.sendMessage(chatId, startMessage, {
+          reply_markup: { inline_keyboard: [[{ text: startButtonText[chosenLanguage], callback_data: `test_start_${chosenLanguage}` }]] },
+          parse_mode: 'Markdown'
+        });
+        await bot.answerCallbackQuery(query.id).catch(() => { });
+      } catch (error) {
+        console.error('Send error:', error.message);
+      }
       return; // Exit to prevent further processing
     }
 
     // Handle test start
     if (action.startsWith('test_start')) {
-      A = B = C = D = E = 0; 
-      currentQuestion = 1;
+      const language = chatState[chatId]?.language || 'uk';
+      chatState[chatId].scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+      chatState[chatId].currentQuestion = 1;
 
       const sessionId = randomUUID();
-      chatState[chatId] = { inProgress: true, currentQuestion, sessionId, lastMessageId: null };
+      chatState[chatId].inProgress = true;
+      chatState[chatId].sessionId = sessionId;
+      chatState[chatId].lastMessageId = null;
 
-      const question = currentLanguage === 'uk' ? questionsUk.first
-        : currentLanguage === 'en' ? questionsEn.first
-          : currentLanguage === 'pl' ? questionsPl.first
-            : questionsRu.first;
+      const question = language === 'uk' ? questionsUk.first :
+        language === 'en' ? questionsEn.first :
+          language === 'pl' ? questionsPl.first :
+            questionsRu.first;
 
-      const sent = await bot.sendMessage(chatId, question, {
-        reply_markup: keyboard(currentQuestion, sessionId),
-        parse_mode: 'Markdown'
-      });
-      chatState[chatId].lastMessageId = sent.message_id;
-      await bot.answerCallbackQuery(query.id).catch(() => {});
+      try {
+        const sent = await bot.sendMessage(chatId, question, {
+          reply_markup: keyboard(chatState[chatId].currentQuestion, sessionId),
+          parse_mode: 'Markdown'
+        });
+        chatState[chatId].lastMessageId = sent.message_id;
+        await bot.answerCallbackQuery(query.id).catch(() => { });
+      } catch (error) {
+        console.error('Send error:', error.message);
+      }
+
       return;
     }
 
@@ -200,35 +220,47 @@ const botLogic = async () => {
       }
 
       // count answer
-      if (option === 1) { A++; }
-      else if (option === 2) { B++; }
-      else if (option === 3) { C++; }
-      else if (option === 4) { D++; }
-      else if (option === 5) { E++; }
+      if (option === 1) st.scores.A++;
+      else if (option === 2) st.scores.B++;
+      else if (option === 3) st.scores.C++;
+      else if (option === 4) st.scores.D++;
+      else if (option === 5) st.scores.E++;
 
       // next question or finish
       if (st.currentQuestion < 13) {
         st.currentQuestion++;
-        const questions = currentLanguage === 'uk' ? questionsUk
-          : currentLanguage === 'en' ? questionsEn
-            : currentLanguage === 'pl' ? questionsPl
+        const language = st.language || 'uk';
+        const questions = language === 'uk' ? questionsUk
+          : language === 'en' ? questionsEn
+            : language === 'pl' ? questionsPl
               : questionsRu;
+
         const keys = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth'];
         const nextQuestion = questions[keys[st.currentQuestion - 1]];
 
-        const sent = await bot.sendMessage(chatId, nextQuestion, {
-          reply_markup: keyboard(st.currentQuestion, st.sessionId),
-          parse_mode: 'Markdown'
-        });
-        st.lastMessageId = sent.message_id;
+        try {
+          const sent = await bot.sendMessage(chatId, nextQuestion, {
+            reply_markup: keyboard(st.currentQuestion, st.sessionId),
+            parse_mode: 'Markdown'
+          });
+          st.lastMessageId = sent.message_id;
+        } catch (error) {
+          console.error('Send error:', error.message);
+        }
       } else {
         // final
-        result(A, B, C, D, E, chatId, currentLanguage);
+        const lang = st.language || 'uk';
+        const { A, B, C, D, E } = st.scores;
+        try {
+          result(A, B, C, D, E, chatId, lang);
+        } catch (error) {
+          console.error('Result send error:', error.message);
+        }
 
         // reset state
-        A = B = C = D = E = 0;
         chatState[chatId].inProgress = false;
         chatState[chatId].currentQuestion = 0;
+        chatState[chatId].sessionId = null;
 
         // deactivate buttons on last question
         if (st.lastMessageId) {
@@ -239,7 +271,7 @@ const botLogic = async () => {
       await bot.answerCallbackQuery(query.id).catch(() => { });
       return;
     }
-
+    await bot.answerCallbackQuery(query.id).catch(() => { });
   });
 };
 
