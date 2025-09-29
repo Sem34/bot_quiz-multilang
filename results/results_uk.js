@@ -1,10 +1,10 @@
 module.exports = {
-  resultMessage: (A, B, C, D, Ecount) => `*Ваш результат:*
+  resultMessage: (A, B, C, D, E) => `*Ваш результат:*
     "Щитоподібний"=${A}/13,
     "Наднирковий"=${B}/13,
     "Печінковий"=${C}/13,
     "Яєчниковий"=${D}/13,
-    "Баланс"=${Ecount}/13`,
+    "Баланс"=${E}/13`,
   
   links: {
       A: `<a href="https://professional.skin/test_a">Щитоподібний</a>`,

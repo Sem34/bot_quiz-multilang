@@ -1,11 +1,11 @@
 // results_en.js
 module.exports = {
-  resultMessage: (A, B, C, D, Ecount) => `*Your result is:*
+  resultMessage: (A, B, C, D, E) => `*Your result is:*
   "Thyroid"=${A}/13,
   "Adrenaline"=${B}/13,
   "Liver-related"=${C}/13,
   "Ovarian"=${D}/13
-  "E → balance — this is a sign of a relatively well-balanced hormonal and nervous system."=${Ecount}/13`,
+  "E → balance — this is a sign of a relatively well-balanced hormonal and nervous system."=${E}/13`,
 
   links: {
     A: `<a href="https://professional.skin/entest_a">Thyroid</a>`,

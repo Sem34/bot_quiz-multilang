@@ -1,11 +1,11 @@
 // results_pl.js
 module.exports = {
-  resultMessage: (A, B, C, D, Ecount) => `*Twój wynik:*
+  resultMessage: (A, B, C, D, E) => `*Twój wynik:*
   Typ tarczycy = ${A}/13,
   Typ adrenalinowy = ${B}/13,
   Typ wątrobowy = ${C}/13,
   Typ jajnikowy = ${D}/13
-  E → równowaga — to oznaka stosunkowo zrównoważonego układu hormonalnego i nerwowego =${Ecount}/13`,
+  E → równowaga — to oznaka stosunkowo zrównoważonego układu hormonalnego i nerwowego =${E}/13`,
 
   links: {
     A: `<a href="https://professional.skin/pltest_a">Typ tarczycy</a>`,

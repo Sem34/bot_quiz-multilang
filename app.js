@@ -46,41 +46,42 @@ const keyboard = (questionsNumber) => {
 };
 
 // Function to display the result
-const result = (A, B, C, D, Ecount, chatId, language) => {
+const result = (A, B, C, D, E, chatId, language) => {
   const results = language === 'uk' ? resultsUk
-    : language === 'en' ? resultsEn
-      : language === 'pl' ? resultsPl
-        : resultsRu;
+               : language === 'en' ? resultsEn
+               : language === 'pl' ? resultsPl
+               : resultsRu;
 
-  // Sen result summary
-  bot.sendMessage(chatId, results.resultMessage(A, B, C, D, Ecount), { parse_mode: 'Markdown' });
+  // Визначаємо фінальний ключ з пріоритетом E при нічиїх
+  const scores = { A, B, C, D, E };
+  const maxScore = Math.max(A, B, C, D, E);
+  const leaders = Object.entries(scores)
+    .filter(([k, v]) => v === maxScore)
+    .map(([k]) => k);
 
-  // if 'E' answers are majority or tie situation, send balanced message
-  if (results.links && results.links.E) {
-    const scores = [A, B, C, D];
-    const maxScore = Math.max(...scores);
-    const leaders = scores.filter(s => s === maxScore).length;
-
-    const majorityE = Ecount >= 7;
-    const tieAD = maxScore === 0 || leaders > 1;
-
-    if (majorityE || tieAD) {
-      bot.sendMessage(chatId, results.links.E, { parse_mode: 'Markdown' });
-      return;
-    }
+  let finalKey;
+  if (leaders.includes('E')) {
+    finalKey = 'E';
+  } else {
+    // стабільний порядок пріоритета, якщо E не серед лідерів
+    const order = ['A', 'B', 'C', 'D'];
+    finalKey = order.find(k => leaders.includes(k));
   }
 
-  const maxScore = Math.max(A, B, C, D); // Find the highest score
+  // 1) Спочатку шлемо лінк (HTML, з прев’ю)
+  if (finalKey && results.links && results.links[finalKey]) {
+    bot.sendMessage(chatId, results.links[finalKey], {
+      parse_mode: 'HTML',
+      disable_web_page_preview: false
+    });
+  }
 
-  // Check which score is the highest and send corresponding link
-  if (maxScore === A) {
-    bot.sendMessage(chatId, results.links.A, { parse_mode: 'HTML' });
-  } else if (maxScore === B) {
-    bot.sendMessage(chatId, results.links.B, { parse_mode: 'HTML' });
-  } else if (maxScore === C) {
-    bot.sendMessage(chatId, results.links.C, { parse_mode: 'HTML' });
-  } else if (maxScore === D) {
-    bot.sendMessage(chatId, results.links.D, { parse_mode: 'HTML' });
+  // 2) Потім — підсумок (Markdown)
+  if (typeof results.resultMessage === 'function') {
+    bot.sendMessage(chatId, results.resultMessage(A, B, C, D, E), {
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true
+    });
   }
 };
 
@@ -88,7 +89,7 @@ const result = (A, B, C, D, Ecount, chatId, language) => {
 const botLogic = async () => {
   bot.setMyCommands([{ command: '/start', description: 'Restart the test' }]);
 
-  let A = 0, B = 0, C = 0, D = 0, Ecount = 0;
+  let A = 0, B = 0, C = 0, D = 0, E = 0;
   let currentLanguage = '';
   let currentQuestion = 0; // Start from 0
 
@@ -110,7 +111,7 @@ const botLogic = async () => {
 
     // Handle language selection
     if (action.startsWith('lang_')) {
-      A = B = C = D = Ecount = 0; // Reset counters
+      A = B = C = D = E = 0; // Reset counters
       currentLanguage = action.split('_')[1]; // Set language
       currentQuestion = 0; // Reset current question
 
@@ -169,8 +170,8 @@ const botLogic = async () => {
         D++;
         console.log(`D count: ${D}`); // Debugging output
       } else if (option === 5) {
-        Ecount++;
-        console.log(`E count: ${Ecount}`); // Debugging output
+        E++;
+        console.log(`E count: ${E}`); // Debugging output
       }
 
       // Check if we should show the next question
@@ -193,7 +194,8 @@ const botLogic = async () => {
         }
       } else {
         // Show results if all questions are answered
-        result(A, B, C, D, Ecount, chatId, currentLanguage);
+        result(A, B, C, D, E, chatId, currentLanguage);
+        A = B = C = D = E = 0;
         currentQuestion = 0; // Reset for the next survey
       }
     } else {
