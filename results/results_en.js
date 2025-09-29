@@ -12,9 +12,6 @@ module.exports = {
     B: `<a href="https://professional.skin/entest_b">Adrenaline</a>`,
     C: `<a href="https://professional.skin/entest_c">Liver-related</a>`,
     D: `<a href="https://professional.skin/entest_d">Ovarian</a>`,
-    E: `*Your result: Balanced hormonal system.*\n
-No distinct body type was identified. This means that your thyroid, adrenal glands, liver, and ovaries are functioning more or less evenly.\n
-This is often the case for people who lead an active lifestyle, pay attention to nutrition and sleep, or have a flexible system of compensations.\n\n
-*Important:* a balanced result does not mean you are free of risks or predispositions. It rather indicates the absence of a strong imbalance. Your body maintains balance, but under stress or with dietary changes, one of the types may become more pronounced.`
+    E: `<a href="https://professional.skin/entest_e">Balanced</a>`
   }
 };
