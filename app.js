@@ -250,3 +250,7 @@ const botLogic = async () => {
 };
 
 botLogic();
+
+module.exports = {
+  bot,
+};
