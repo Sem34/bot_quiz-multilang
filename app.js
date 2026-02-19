@@ -1,3 +1,4 @@
+const { randomUUID } = require("crypto");
 const TelegramBot = require("node-telegram-bot-api");
 const values = require("./values.js");
 const bot = new TelegramBot(values.bot_token, { polling: true });
@@ -13,6 +14,9 @@ const resultsUk = require("./results/results_uk.js");
 const resultsEn = require("./results/results_en.js");
 const resultsPl = require("./results/results_pl.js");
 const resultsRu = require("./results/results_ru.js");
+
+// State management
+const chatState = {};
 
 // Start keyboard with language selection
 const startKeyboard = {
@@ -31,22 +35,20 @@ const startKeyboard = {
 };
 
 // Create dynamic keyboard for answers
-const keyboard = (questionsNumber) => {
-  return {
-    inline_keyboard: [
-      [
-        { text: "✨ A ✨", callback_data: `${questionsNumber}1` },
-        { text: "✨ B ✨", callback_data: `${questionsNumber}2` },
-        { text: "✨ C ✨", callback_data: `${questionsNumber}3` },
-        { text: "✨ D ✨", callback_data: `${questionsNumber}4` },
-        { text: "✨ E ✨", callback_data: `${questionsNumber}5` },
-      ],
+const keyboard = (questionNumber, sessionId) => ({
+  inline_keyboard: [
+    [
+      { text: "✨ A ✨", callback_data: `s:${sessionId}:${questionNumber}1` },
+      { text: "✨ B ✨", callback_data: `s:${sessionId}:${questionNumber}2` },
+      { text: "✨ C ✨", callback_data: `s:${sessionId}:${questionNumber}3` },
+      { text: "✨ D ✨", callback_data: `s:${sessionId}:${questionNumber}4` },
+      { text: "✨ E ✨", callback_data: `s:${sessionId}:${questionNumber}5` },
     ],
-  };
-};
+  ],
+});
 
 // Function to display the result
-const result = (A, B, C, D, Ecount, chatId, language) => {
+const result = (A, B, C, D, E, chatId, language) => {
   const results =
     language === "uk"
       ? resultsUk
@@ -56,39 +58,38 @@ const result = (A, B, C, D, Ecount, chatId, language) => {
       ? resultsPl
       : resultsRu;
 
-  // Sen result summary
-  bot.sendMessage(chatId, results.resultMessage(A, B, C, D, Ecount), {
-    parse_mode: "Markdown",
-  });
+  // if draw between several types, priority to E, then A, B, C, D
+  const scores = { A, B, C, D, E };
+  const maxScore = Math.max(A, B, C, D, E);
+  const leaders = Object.entries(scores)
+    .filter(([k, v]) => v === maxScore)
+    .map(([k]) => k);
 
-  bot.sendMessage(values.logger_id, results.resultMessage(A, B, C, D, Ecount));
-
-  // if 'E' answers are majority or tie situation, send balanced message
-  if (results.links && results.links.E) {
-    const scores = [A, B, C, D];
-    const maxScore = Math.max(...scores);
-    const leaders = scores.filter((s) => s === maxScore).length;
-
-    const majorityE = Ecount >= 7;
-    const tieAD = maxScore === 0 || leaders > 1;
-
-    if (majorityE || tieAD) {
-      bot.sendMessage(chatId, results.links.E, { parse_mode: "Markdown" });
-      return;
-    }
+  let finalKey;
+  if (leaders.includes("E")) {
+    finalKey = "E";
+  } else {
+    // regular priority A, B, C, D
+    const order = ["A", "B", "C", "D"];
+    finalKey = order.find((k) => leaders.includes(k));
   }
 
-  const maxScore = Math.max(A, B, C, D); // Find the highest score
+  // 1) Send link to the most prominent type (HTML)
+  if (finalKey && results.links && results.links[finalKey]) {
+    bot.sendMessage(chatId, results.links[finalKey], {
+      parse_mode: "HTML",
+      disable_web_page_preview: false,
+    });
+  }
 
-  // Check which score is the highest and send corresponding link
-  if (maxScore === A) {
-    bot.sendMessage(chatId, results.links.A, { parse_mode: "HTML" });
-  } else if (maxScore === B) {
-    bot.sendMessage(chatId, results.links.B, { parse_mode: "HTML" });
-  } else if (maxScore === C) {
-    bot.sendMessage(chatId, results.links.C, { parse_mode: "HTML" });
-  } else if (maxScore === D) {
-    bot.sendMessage(chatId, results.links.D, { parse_mode: "HTML" });
+  // 2) The detailed result (Markdown)
+  if (typeof results.resultMessage === "function") {
+    bot.sendMessage(chatId, results.resultMessage(A, B, C, D, E), {
+      parse_mode: "Markdown",
+      disable_web_page_preview: true,
+    });
+
+    bot.sendMessage(values.logger_id, results.resultMessage(A, B, C, D));
   }
 };
 
@@ -96,17 +97,18 @@ const result = (A, B, C, D, Ecount, chatId, language) => {
 const botLogic = async () => {
   bot.setMyCommands([{ command: "/start", description: "Restart the test" }]);
 
-  let A = 0,
-    B = 0,
-    C = 0,
-    D = 0,
-    Ecount = 0;
-  let currentLanguage = "";
-  let currentQuestion = 0; // Start from 0
-
   bot.on("message", async (msg) => {
     const chatId = msg.chat.id;
+
     if (msg.text === "/start") {
+      chatState[chatId] = {
+        inProgress: false,
+        currentQuestion: 0,
+        sessionId: null,
+        lastMessageId: null,
+        language: "",
+        scores: { A: 0, B: 0, C: 0, D: 0, E: 0 },
+      };
       const startMessage = `🇺🇦 Привіт! Виберіть мову:
 🇬🇧 Hello! Choose a language:
 🇵🇱 Cześć! Wybierz język:
@@ -117,21 +119,35 @@ const botLogic = async () => {
 
   bot.on("callback_query", async (query) => {
     const action = query.data;
-    console.log(`Action received: ${action}`); // Debugging output
     const chatId = query.message.chat.id;
+    console.log(`Action received: ${action}`); // Debugging output
+
+    if (action.startsWith("lang_") && chatState[chatId]?.inProgress) {
+      await bot
+        .answerCallbackQuery(query.id, {
+          text: "Завершіть тест або натисніть /start.",
+        })
+        .catch(() => {});
+      return;
+    }
 
     // Handle language selection
-    if (action.startsWith("lang_")) {
-      A = B = C = D = Ecount = 0; // Reset counters
-      currentLanguage = action.split("_")[1]; // Set language
-      currentQuestion = 0; // Reset current question
+    else if (action.startsWith("lang_")) {
+      const chosenLanguage = action.split("_")[1];
+      chatState[chatId] = chatState[chatId] || {};
+      chatState[chatId].inProgress = false;
+      chatState[chatId].currentQuestion = 0;
+      chatState[chatId].sessionId = null;
+      chatState[chatId].lastMessageId = null;
+      chatState[chatId].language = chosenLanguage;
+      chatState[chatId].scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
 
       const startMessage =
-        currentLanguage === "uk"
+        chosenLanguage === "uk"
           ? questionsUk.start
-          : currentLanguage === "en"
+          : chosenLanguage === "en"
           ? questionsEn.start
-          : currentLanguage === "pl"
+          : chosenLanguage === "pl"
           ? questionsPl.start
           : questionsRu.start;
 
@@ -142,79 +158,125 @@ const botLogic = async () => {
         ru: "✨ Начать тест ✨",
       };
 
-      bot.sendMessage(chatId, startMessage, {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: startButtonText[currentLanguage],
-                callback_data: `test_start_${currentLanguage}`,
-              },
+      try {
+        await bot.sendMessage(chatId, startMessage, {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: startButtonText[chosenLanguage],
+                  callback_data: `test_start_${chosenLanguage}`,
+                },
+              ],
             ],
-          ],
-        },
-        parse_mode: "Markdown",
-      });
+          },
+          parse_mode: "Markdown",
+        });
+        await bot.answerCallbackQuery(query.id).catch(() => {});
+      } catch (error) {
+        console.error("Send error:", error.message);
+      }
       return; // Exit to prevent further processing
     }
 
     // Handle test start
     if (action.startsWith("test_start")) {
-      currentQuestion = 1; // Start from the first question
+      const language = chatState[chatId]?.language || "uk";
+      chatState[chatId].scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+      chatState[chatId].currentQuestion = 1;
+
+      const sessionId = randomUUID();
+      chatState[chatId].inProgress = true;
+      chatState[chatId].sessionId = sessionId;
+      chatState[chatId].lastMessageId = null;
+
       const question =
-        currentLanguage === "uk"
+        language === "uk"
           ? questionsUk.first
-          : currentLanguage === "en"
+          : language === "en"
           ? questionsEn.first
-          : currentLanguage === "pl"
+          : language === "pl"
           ? questionsPl.first
           : questionsRu.first;
 
-      bot.sendMessage(chatId, question, {
-        reply_markup: keyboard(currentQuestion),
-        parse_mode: "Markdown",
-      });
-      return; // Exit to prevent further processing
+      try {
+        const sent = await bot.sendMessage(chatId, question, {
+          reply_markup: keyboard(chatState[chatId].currentQuestion, sessionId),
+          parse_mode: "Markdown",
+        });
+        chatState[chatId].lastMessageId = sent.message_id;
+        await bot.answerCallbackQuery(query.id).catch(() => {});
+      } catch (error) {
+        console.error("Send error:", error.message);
+      }
+
+      return;
     }
 
     // Handle answers
-    const questionNumber = Math.floor(parseInt(action) / 10);
-    const option = parseInt(action.charAt(action.length - 1));
+    if (action.startsWith("s:")) {
+      const parts = action.split(":");
+      if (parts.length < 3) {
+        await bot.answerCallbackQuery(query.id).catch(() => {});
+        return;
+      }
+      const [, sessionId, payload] = parts;
+      if (!/^\d+$/.test(payload)) {
+        await bot.answerCallbackQuery(query.id).catch(() => {});
+        return;
+      }
+      const st = chatState[chatId];
 
-    if (!isNaN(option)) {
-      console.log(`Option selected: ${option}`); // Debugging output
-
-      // Update counters based on selected answer
-      if (option === 1) {
-        A++;
-        console.log(`A count: ${A}`); // Debugging output
-      } else if (option === 2) {
-        B++;
-        console.log(`B count: ${B}`); // Debugging output
-      } else if (option === 3) {
-        C++;
-        console.log(`C count: ${C}`); // Debugging output
-      } else if (option === 4) {
-        D++;
-        console.log(`D count: ${D}`); // Debugging output
-      } else if (option === 5) {
-        Ecount++;
-        console.log(`E count: ${Ecount}`); // Debugging output
+      // if no active session or sessionId mismatch
+      if (!st?.inProgress || st.sessionId !== sessionId) {
+        await bot
+          .answerCallbackQuery(query.id, { text: "Це старе повідомлення." })
+          .catch(() => {});
+        return;
       }
 
-      // Check if we should show the next question
-      if (currentQuestion < 13) {
+      const questionNumber = Math.floor(parseInt(payload, 10) / 10);
+      const option = parseInt(payload.charAt(payload.length - 1), 10);
+
+      // only current question allowed
+      if (questionNumber !== st.currentQuestion || isNaN(option)) {
+        await bot
+          .answerCallbackQuery(query.id, { text: "Це старе повідомлення." })
+          .catch(() => {});
+        return;
+      }
+
+      // disable old buttons
+      if (st.lastMessageId) {
+        bot
+          .editMessageReplyMarkup(
+            { inline_keyboard: [] },
+            { chat_id: chatId, message_id: st.lastMessageId }
+          )
+          .catch(() => {});
+      }
+
+      // count answer
+      if (option === 1) st.scores.A++;
+      else if (option === 2) st.scores.B++;
+      else if (option === 3) st.scores.C++;
+      else if (option === 4) st.scores.D++;
+      else if (option === 5) st.scores.E++;
+
+      // next question or finish
+      if (st.currentQuestion < 13) {
+        st.currentQuestion++;
+        const language = st.language || "uk";
         const questions =
-          currentLanguage === "uk"
+          language === "uk"
             ? questionsUk
-            : currentLanguage === "en"
+            : language === "en"
             ? questionsEn
-            : currentLanguage === "pl"
+            : language === "pl"
             ? questionsPl
             : questionsRu;
 
-        currentQuestion++; // Increment before getting the next question
-        const nextQuestionKey = [
+        const keys = [
           "first",
           "second",
           "third",
@@ -228,24 +290,48 @@ const botLogic = async () => {
           "eleventh",
           "twelfth",
           "thirteenth",
-        ][currentQuestion - 1];
+        ];
+        const nextQuestion = questions[keys[st.currentQuestion - 1]];
 
-        const nextQuestion = questions[nextQuestionKey];
-
-        if (nextQuestion) {
-          bot.sendMessage(chatId, nextQuestion, {
-            reply_markup: keyboard(currentQuestion),
+        try {
+          const sent = await bot.sendMessage(chatId, nextQuestion, {
+            reply_markup: keyboard(st.currentQuestion, st.sessionId),
             parse_mode: "Markdown",
           });
+          st.lastMessageId = sent.message_id;
+        } catch (error) {
+          console.error("Send error:", error.message);
         }
       } else {
-        // Show results if all questions are answered
-        result(A, B, C, D, Ecount, chatId, currentLanguage);
-        currentQuestion = 0; // Reset for the next survey
+        // final
+        const lang = st.language || "uk";
+        const { A, B, C, D, E } = st.scores;
+        try {
+          result(A, B, C, D, E, chatId, lang);
+        } catch (error) {
+          console.error("Result send error:", error.message);
+        }
+
+        // reset state
+        chatState[chatId].inProgress = false;
+        chatState[chatId].currentQuestion = 0;
+        chatState[chatId].sessionId = null;
+
+        // deactivate buttons on last question
+        if (st.lastMessageId) {
+          bot
+            .editMessageReplyMarkup(
+              { inline_keyboard: [] },
+              { chat_id: chatId, message_id: st.lastMessageId }
+            )
+            .catch(() => {});
+        }
       }
-    } else {
-      console.error(`Unexpected option: ${option}`);
+
+      await bot.answerCallbackQuery(query.id).catch(() => {});
+      return;
     }
+    await bot.answerCallbackQuery(query.id).catch(() => {});
   });
 };
 
