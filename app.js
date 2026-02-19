@@ -1,6 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
 const values = require("./values.js");
-
 const bot = new TelegramBot(values.bot_token, { polling: true });
 
 // Import question files
