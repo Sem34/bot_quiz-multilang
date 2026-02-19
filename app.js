@@ -89,10 +89,7 @@ const result = (A, B, C, D, E, chatId, language) => {
       disable_web_page_preview: true,
     });
 
-    bot.sendMessage(
-      values.logger_id,
-      results.resultMessage(A, B, C, D, Ecount)
-    );
+    bot.sendMessage(values.logger_id, results.resultMessage(A, B, C, D));
   }
 };
 
