@@ -182,7 +182,14 @@ const botLogic = async () => {
     // Handle test start
     if (action.startsWith("test_start")) {
       const language = chatState[chatId]?.language || "uk";
-      chatState[chatId].scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+      chatState[chatId] = {
+        inProgress: false,
+        currentQuestion: 0,
+        sessionId: null,
+        lastMessageId: null,
+        language: "",
+        scores: { A: 0, B: 0, C: 0, D: 0, E: 0 },
+      };
       chatState[chatId].currentQuestion = 1;
 
       const sessionId = randomUUID();
